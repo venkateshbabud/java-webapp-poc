@@ -1,0 +1,30 @@
+name: Clean up old workflow runs
+
+on:
+  schedule:
+    - cron: '30 18 * * *'  # This will run the workflow every day at 6:30 PM UTC (which is midnight IST)
+  workflow_dispatch:  # Allow manual trigger if needed
+
+jobs:
+  delete-workflow-runs:
+    runs-on: ubuntu-latest
+    name: A demo job to delete old workflow runs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Delete old workflow runs
+        uses: MajorScruffy/delete-old-workflow-runs@v1 # Use the action from the repository
+        id: delete-old-workflow-runs
+        with:
+          repository: ${{ github.repository }}  # This will dynamically set the repository name
+          workflow: ".github/workflows/main.yml"  # Path to your workflow file to target
+          older-than-seconds: 2592000  # 30 days in seconds
+          # Optional inputs:
+          # created-before: "2021-12-08T16:34:00Z"  # If you want to delete based on a specific date
+          # actor: test@test.com  # If you want to delete based on a specific actor (author)
+          # branch: main  # If you want to filter by a specific branch
+          # event: push  # You can specify the event that triggered the workflow (push, pull_request, etc.)
+          # what-if: true  # Uncomment for a dry-run to preview the workflows that would be deleted
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub token with permissions to delete workflows
